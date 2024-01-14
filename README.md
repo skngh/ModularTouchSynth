@@ -1,9 +1,11 @@
 # Touchpad Modular Synth
+#### by Sam Knight
 Patchable synth using Simple Synth Touch Kit. Edit your instrument and play it at the same time! Featuring 3 oscillators, a chorus, delay and many other changable parameters.
 
 
 ## Using the Synth
-Before editing, I like to have a sequence going so I can hear the changes in real time (See sequencing...). Once you have the sequence you can go into edit mode and follow the "Pad Modules" and "Knob Parameters for Each Module" table to change what you'd like. The synth features a chorus and delay, and typical modular synth parameters that you're free to change. In patch mode, you are able to patch the 3 oscillators into eachother. Once patched, you can then change the FM amount for the carrier oscillators and choose what level of FM you'd like. You can unpatch at anytime by hitting pad 11 (except when you're in sequence mode). 
+Before editing, I like to have a sequence going so I can hear the changes in real time (See sequencing...). Once you have the sequence you can go into edit mode and follow the "Pad Modules" and "Knob Parameters for Each Module" table to change what you'd like. The synth features a chorus and delay, and typical modular synth parameters that you're free to change. In patch mode, you are able to patch the 3 oscillators into eachother. Once patched, you can then change the FM amount for the carrier oscillators and choose what level of FM you'd like. You can unpatch at anytime by hitting pad 11 (except when you're in sequence mode).
+<br><br> *Tip:* When patching oscillators for FM synthesis, you'll have the best results with having the carrier oscillator be a sin wave.
 
 # Modes
 ### Play Mode: 

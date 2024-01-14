@@ -1,3 +1,9 @@
+// Title: Modular Touch Synth
+// Description: Patchable 3 voice synth using Simple Synth Touch Kit.
+// Hardware: Daisy Seed with Simple Touch Synth
+// Author: Sam Knight
+
+
 #include "DaisyDuino.h"
 #include "simple-daisy.h"
 #include "term.h"
@@ -50,6 +56,7 @@ class Osc
     float fmAmount = 1.f;
     float pulseWidth = 0.f;
     float waveform = 2;
+    float modulatingFreq = 440.f;
 
     Osc(float _samplerate)
     {
@@ -190,11 +197,12 @@ void MyCallback(float **in, float **out, size_t size) {
     {
       if(oscillators[i].GetModulated() != -1) // if it's being modulated
       {
-        oscillators[i].SetFreq(oscillators[i].noteHit + ((oscillators[i].noteHit * 3) * (oscillators[oscillators[i].GetModulated()].Process() * oscillators[i].fmAmount)));
+        oscillators[i].SetFreq(oscillators[i].noteHit + (oscillators[i].noteHit * (oscillators[oscillators[i].GetModulated()].Process() * oscillators[i].fmAmount)));
       }
-      else // carrier oscillators
+      else // not being modulated
       {
-        oscillators[i].SetFreq(oscillators[i].noteHit);
+        if(oscillators[i].GetModulating() == -1) // if it is not modulating something
+          oscillators[i].SetFreq(oscillators[i].noteHit);
       }
     }
     osc_sig = (((oscillators[0].Process() * oscillators[0].modMixerLevel * oscillators[0].mixerLevel) * 0.3f) +
@@ -432,8 +440,18 @@ void ProcessADC()
       ConditionalParameter(_k4, analogRead(K4) / 1023.f, osc1Freq); // Frequency (out of 12 to transpose hit note)
       ConditionalParameter(_k5, analogRead(K5) / 1023.f, oscillators[0].pulseWidth); // Pulse Width
 
-      oscillators[0].SetWaveform(osc1Waveform * 4);
-      oscillators[0].freq = fmap(osc1Freq, 0, 12.9f);
+
+
+      if(oscillators[0].GetModulating() == -1)
+      {
+        oscillators[0].SetWaveform(osc1Waveform * 4);
+        oscillators[0].freq = fmap(osc1Freq, 0, 12.9f);
+      }
+      else
+      {
+        oscillators[0].modulatingFreq = fmap(osc1Freq, 10, 6000, daisysp::Mapping::EXP);
+        oscillators[0].SetFreq(oscillators[0].modulatingFreq);
+      }
       break;
     case Osc2Mode:
       ConditionalParameter(_k1, analogRead(K1) / 1023.f, osc2Waveform); // Waveform (0-4)
@@ -441,8 +459,17 @@ void ProcessADC()
       ConditionalParameter(_k4, analogRead(K4) / 1023.f, osc2Freq); // Frequency (out of 12 to transpose hit note)
       ConditionalParameter(_k5, analogRead(K5) / 1023.f, oscillators[1].pulseWidth); // Pulse Width
 
-      oscillators[1].SetWaveform(osc2Waveform * 4);
-      oscillators[1].freq = fmap(osc2Freq, 0, 12.9f);
+
+      if(oscillators[1].GetModulating() == -1)
+      {
+        oscillators[1].SetWaveform(osc2Waveform * 4);
+        oscillators[1].freq = fmap(osc2Freq, 0, 12.9f);
+      }
+      else
+      {
+        oscillators[1].modulatingFreq = fmap(osc2Freq, 10, 6000, daisysp::Mapping::EXP);
+        oscillators[1].SetFreq(oscillators[1].modulatingFreq);
+      }
       break;
     case Osc3Mode:
       ConditionalParameter(_k1, analogRead(K1) / 1023.f, osc3Waveform); // Waveform (0-4)
@@ -451,7 +478,14 @@ void ProcessADC()
       ConditionalParameter(_k5, analogRead(K5) / 1023.f, oscillators[2].pulseWidth); // Pulse Width
 
       oscillators[2].SetWaveform(osc3Waveform * 4);
-      oscillators[2].freq = fmap(osc3Freq, 0, 12.9f);
+
+      if(oscillators[2].GetModulating() == -1)
+        oscillators[2].freq = fmap(osc3Freq, 0, 12.9f);
+      else
+      {
+        oscillators[2].modulatingFreq = fmap(osc3Freq, 10, 6000, daisysp::Mapping::EXP);
+        oscillators[2].SetFreq(oscillators[2].modulatingFreq);
+      }
       break;
     case EnvMode:
       ConditionalParameter(_k3, analogRead(K3) / 1023.f, _attack); // Attack
@@ -514,11 +548,11 @@ void PlaySequence()
             }
             sequencerEnv.Trigger();
           }
-          _metronomeCanIterate = false;
+          _metronomeCanIterate = false; 
           _sequencerIndex++;
         }
       }
-      else
+      else // this is so it only sequences once per metronome hit
       {
 
         _metronomeCanIterate = true;
